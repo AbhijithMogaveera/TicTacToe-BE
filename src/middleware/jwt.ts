@@ -8,7 +8,7 @@ export function validateToken(
 	next: NextFunction
 ) {
 	try {
-		const bearerHeader = req.headers.get('authorization')?.split(' ')[1];
+		const bearerHeader = req.headers['authorization']?.split(' ')[1];
 		if (bearerHeader) {
 			req.tokenPayload = TokenManager.verifyToken(bearerHeader);
 			next();
@@ -21,7 +21,7 @@ export function validateToken(
             .send({ 
                 message: 'Token Error', 
                 err: err, 
-                token: req.headers.get('authorization')?.split(' ')[1] 
+                token: req.headers['authorization']?.split(' ')[1] 
             });
 	}
 }
