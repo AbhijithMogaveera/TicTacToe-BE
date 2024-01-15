@@ -1,29 +1,33 @@
 import { NextFunction, Request, Response } from "express";
 import { UserRegistrationValidationSchema } from "../validators/profile";
 import { AuthService } from "../services/auth";
+import { AuthIssueKeys, ClientIssue, handleException, resAsClientIssue } from "../config/ClientIssue";
+import { ClientError } from "../error/error";
 
 export const AuthRestContoller = {
   async loginRoute(req: Request, res: Response) {
     try {
       if (!req.body.user_name) {
-        res.status(400).json({ message: "user_name is required" });
+        throw new ClientError(
+          "key user_name is required",
+          AuthIssueKeys.UserNameIsRequired
+        )
         return;
       }
       if (!req.body.password) {
-        res.status(400).json({ message: "password is required" });
+        throw new ClientError(
+          "key password is required",
+          AuthIssueKeys.PasswordIsRequired
+        )
         return;
       }
       const user_name = req.body.user_name;
       const password = req.body.password;
       const token = await AuthService.loginUser(user_name, password);
-      res.status(200).json({
-        token: token,
-      });
+      res.status(200).send(token);
     } catch (e: any) {
-      console.log(e);
-      res.status(400).json({
-        message: e?.message,
-      });
+      console.log(e)
+      handleException(res,e)
     }
   },
 
@@ -42,10 +46,7 @@ export const AuthRestContoller = {
         token: token,
       });
     } catch (e: any) {
-      console.log(e, "B");
-      res.status(400).json({
-        message: e?.message,
-      });
+      handleException(res,e)
     }
   },
 };

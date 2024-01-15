@@ -1,3 +1,5 @@
+import { AuthIssueKeys } from "../config/ClientIssue";
+import { ClientError } from "../error/error";
 import { UserRegistration } from "../models/profile";
 import { UserRegistrationMongoModel } from "../schema/auth";
 import { TokenManager } from "../util/jwt";
@@ -10,8 +12,9 @@ export const AuthService = {
       });
 
       if (existingUser) {
-        throw new Error(
-          "Username already exists. Please choose a different username."
+        throw new ClientError(
+          "Username already exists. Please choose a different username.",
+          AuthIssueKeys.UserAlreadyExist
         );
       }
       const newUser = await UserRegistrationMongoModel.create(userData);
@@ -22,17 +25,13 @@ export const AuthService = {
   },
 
   async loginUser(user_name: string, password: string): Promise<string | null> {
-    try {
       const user = await UserRegistrationMongoModel.findOne({ user_name });
       if (!user) {
-        throw `Login failed : user ${user_name} not found`;
+        throw new ClientError(`Login failed : user ${user_name} not found`, AuthIssueKeys.InvalidUserID);
       }
       if (user.password !== password) {
-        throw `Login failed : invalid password`;
+        throw new ClientError(`Login failed : invalid password`, AuthIssueKeys.InvalidPassword);
       }
       return TokenManager.signUser({ user_name: user.user_name });
-    } catch (error: any) {
-      throw new Error(error);
-    }
   },
 };
