@@ -12,14 +12,12 @@ export const AuthRestContoller = {
           "key user_name is required",
           AuthIssueKeys.UserNameIsRequired
         )
-        return;
       }
       if (!req.body.password) {
         throw new ClientError(
           "key password is required",
           AuthIssueKeys.PasswordIsRequired
         )
-        return;
       }
       const user_name = req.body.user_name;
       const password = req.body.password;
