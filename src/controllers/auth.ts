@@ -36,7 +36,6 @@ export const AuthRestContoller = {
         req.body
       );
       if (error || !value) {
-        console.log(error, value, "A");
         return res.status(400).json({ error: error?.details[0].message });
       }
       let token = await AuthService.registerUser(value);

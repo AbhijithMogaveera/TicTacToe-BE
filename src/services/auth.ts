@@ -6,8 +6,9 @@ import { UserRegistrationMongoModel } from "../schema/auth";
 import { TokenManager } from "../util/jwt";
 
 export const AuthService = {
+
   async registerUser(userData: UserRegistration): Promise<string> {
-    try {
+
       const existingUser = await UserRegistrationMongoModel.findOne({
         user_name: userData.user_name,
       });
@@ -18,11 +19,11 @@ export const AuthService = {
           AuthIssueKeys.UserAlreadyExist
         );
       }
+  
       const newUser = await UserRegistrationMongoModel.create(userData);
+  
       return TokenManager.signUser({ user_name: newUser.user_name });
-    } catch (error: any) {
-      throw new Error(`Registration failed: ${error?.message}`);
-    }
+  
   },
 
   async loginUser(user_name: string, password: string): Promise<string | null> {
