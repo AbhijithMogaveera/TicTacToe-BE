@@ -15,9 +15,9 @@ const userSchema = new mongoose.Schema<UserDocument>({
     type: String,
     default: "",
   },
-  profilePicture: {
+  profile_picture: {
     type: String,
-    default: "default_profile_picture_url.jpg",
+    default: undefined,
   },
   password:{
     type:String,

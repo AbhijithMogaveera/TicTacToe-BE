@@ -1,6 +1,4 @@
-import { error } from "console";
-import { Response, response } from "express";
-import { any } from "joi";
+import { Response } from "express";
 import { ClientError } from "../error/error";
 
 export interface ClientIssue {
@@ -13,33 +11,17 @@ export let AuthIssueKeys = {
   InvalidPassword: "invalid_password",
   UserAlreadyExist: "user_already_exists",
   UserNameIsRequired: "user_name_required",
-  PasswordIsRequired:"password_is_required"
+  PasswordIsRequired: "password_is_required",
 };
 
-
-export function resAsClientIssue({
-  res,
-  issue,
-  status = 400,
-}: {
-  res: any;
-  issue: ClientIssue;
-  status?: number;
-}) {
-  res.status(status).json(issue);
-}
-
 export function handleException(res: Response, e: any) {
-  console.log("Is client side error"+`${e instanceof ClientError}`)
+  console.log("Is client side error" + `${e instanceof ClientError}`);
   if (e instanceof ClientError) {
     let issue: ClientIssue = {
       key: e.key,
       message: e.message,
     };
-    resAsClientIssue({
-      res: res,
-      issue: issue,
-    });
+    res.status(400).json(issue);
   } else {
     res.status(500).send({
       message: "somthing went wrong",

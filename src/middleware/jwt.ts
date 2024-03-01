@@ -1,6 +1,7 @@
 import { NextFunction, Response } from "express";
 import { TokenManager } from "../util/jwt";
 import { ApiRequest } from "../core/Request";
+import { ClientIssue } from "../config/ClientIssue";
 
 export function validateToken(
 	req: ApiRequest,
@@ -16,12 +17,12 @@ export function validateToken(
 		}
 		throw 'Token required';
 	} catch (err) {
+		let issue:ClientIssue = {
+			key : "ToeknNotFound",
+			message : "Please provide the aut token in header Authorization"
+		} 
 		res.
-            status(400)
-            .send({ 
-                message: 'Token Error', 
-                err: err, 
-                token: req.headers['authorization']?.split(' ')[1] 
-            });
+            status(401)
+            .send(issue);
 	}
 }
