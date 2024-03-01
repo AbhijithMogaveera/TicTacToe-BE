@@ -1,7 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import { UserRegistrationValidationSchema } from "../validators/profile";
+import { Request, Response } from "express";
 import { AuthService } from "../services/auth";
-import { AuthIssueKeys, ClientIssue, handleException, resAsClientIssue } from "../config/ClientIssue";
+import { AuthIssueKeys, handleException } from "../config/ClientIssue";
 import { ClientError } from "../error/error";
 
 export const AuthRestContoller = {
@@ -31,18 +30,14 @@ export const AuthRestContoller = {
 
   async registrationRoute(req: Request, res: Response) {
     try {
-      console.log("RegistrationAPICalled", req.body);
-      let { error, value } = UserRegistrationValidationSchema.validate(
-        req.body
-      );
-      if (error || !value) {
-        console.log(error, value, "A");
-        return res.status(400).json({ error: error?.details[0].message });
+      if(!req.body.user_name){
+        throw new ClientError("user_name is not allowed to be empty", AuthIssueKeys.InvalidUserID)
       }
-      let token = await AuthService.registerUser(value);
-      res.status(200).json({
-        token: token,
-      });
+      if(!req.body.password){
+        throw new ClientError("password is not allowed to be empty", AuthIssueKeys.InvalidPassword)
+      }
+      let token = await AuthService.registerUser(req.body);
+      res.status(200).send(token);
     } catch (e: any) {
       handleException(res,e)
     }
