@@ -12,6 +12,8 @@ export let AuthIssueKeys = {
   UserAlreadyExist: "user_already_exists",
   UserNameIsRequired: "user_name_required",
   PasswordIsRequired: "password_is_required",
+  MissingToken:"missing_auth_token",
+  InvalidToken:"invalid_token"
 };
 
 export function handleException(res: Response, e: any) {
