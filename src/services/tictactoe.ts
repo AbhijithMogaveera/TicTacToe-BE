@@ -1,33 +1,21 @@
-import express from "express";
 import http from "http";
-import { Server, Socket } from "socket.io";
+import WebSocket from 'ws';
 
-async function startTicTacToeService(app: express.Application) {
-  const io = new Server(http.createServer(app));
+export async function startTicTacToeService(app:Express.Application,onStart:(port:number)=>void) {
+  
+  const server = http.createServer(app);
+  const wss = new WebSocket.Server({ server });
+  wss.on("connection", (ws)=>{
+    console.log("client got connected")
+    ws.on("message", (message)=>{
+      console.log("message => ",message)
+      ws.send(`server saw your message => ${message}`)
+    })
+  })
+  server.listen(5036,()=>{
+    onStart(5036)
+  })
 
-  //--------Token Validation
-  io.use((socket: Socket, next) => {
-    const token = socket.handshake.auth.token;
-    if (!token) {
-      return next(new Error("Authentication error"));
-    }
-
-    //https://stackoverflow.com/a/73366040/8370216
-    // jwt.verify(token, secretKey, (err, decoded) => {
-    //   if (err) {
-    //     return next(new Error('Authentication error'));
-    //   }
-    //   // Attach the decoded token payload to the socket object for further use
-    //   socket.decoded = decoded;
-    //   next();
-    // });
-  });
-
-  io.on("connection", (client: Socket) => {
-    io.on("disconnect", (client: Socket) => {
-      client.id;
-    });
-  });
 }
 
 type Player = 1 | 0 | -1;
