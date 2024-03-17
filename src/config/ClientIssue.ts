@@ -17,7 +17,6 @@ export let AuthIssueKeys = {
 };
 
 export function handleException(res: Response, e: any) {
-  console.log("Is client side error" + `${e instanceof ClientError}`);
   if (e instanceof ClientError) {
     let issue: ClientIssue = {
       key: e.key,

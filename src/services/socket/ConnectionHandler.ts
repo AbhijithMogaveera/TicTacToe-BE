@@ -1,12 +1,8 @@
+import e from "express";
 import { SocketKeys } from "../../models/socket/SocketKeys";
+import { UserMeta } from "../../models/socket/UserMeta";
 import { findUserByUsername } from "../profile";
 import { WebSocket } from "ws";
-
-interface UserMeta {
-  bio: string;
-  profile_image?: string;
-  user_name: string;
-}
 
 let connections: {
   [user_name: string]: {
@@ -18,7 +14,6 @@ let connections: {
 let activeConnetcionsObserver: string[] = [];
 
 class ConnectionHandler {
-
   async addConnection({
     ws,
     user_name,
@@ -51,41 +46,45 @@ class ConnectionHandler {
     for (const user_name in connections) {
       activeusersMeta.push(connections[user_name].meta);
     }
-    activeusersMeta.forEach((meta)=>{
-      connections[meta.user_name].ws.send(JSON.stringify({
-        event:SocketKeys.activePlayer,
-        data:activeusersMeta
-      }));
-    })
-    console.log(activeusersMeta.map(it=>it.user_name), activeConnetcionsObserver)
+    activeConnetcionsObserver.forEach((user_name) => {
+      try {
+        connections[user_name].ws.send(
+          JSON.stringify({
+            event: SocketKeys.activePlayer,
+            data: activeusersMeta,
+          })
+        );
+      } catch (error) {
+        console.log(error)
+      }
+    });
   }
 
-  broadCastUpdatedConnectionsListTo(user_name:string){
-    if(!connections[user_name]){
-      return
+  broadCastUpdatedConnectionsListTo(user_name: string) {
+    if (!connections[user_name]) {
+      return;
     }
     let arr: UserMeta[] = [];
     for (const user_name in connections) {
       arr.push(connections[user_name].meta);
     }
-    connections[user_name].ws.send(JSON.stringify({
-      event:SocketKeys.activePlayer,
-      data:arr
-    }));
+    connections[user_name].ws.send(
+      JSON.stringify({
+        event: SocketKeys.activePlayer,
+        data: arr,
+      })
+    );
   }
 
   removeConnection(userName: string) {
-    if (connections[userName]) {
-      connections[userName].ws.close();
-    }
     this.stopObserverConnectinList(userName);
-    delete connections[userName];
     this.broadCastUpdatedConnectionsList();
+    delete connections[userName];
   }
 
   observeConnecitonList(user_name: string) {
     activeConnetcionsObserver.push(user_name);
-    this.broadCastUpdatedConnectionsListTo(user_name)
+    this.broadCastUpdatedConnectionsListTo(user_name);
   }
 
   stopObserverConnectinList(user_name: string) {
@@ -93,15 +92,9 @@ class ConnectionHandler {
     activeConnetcionsObserver.splice(index, 1);
   }
 
+  getConnectionByUserName(user_name: string) {
+    return connections[user_name];
+  }
 }
 
 export let connectionHandler = new ConnectionHandler();
-
-let x = {
-  name:"abhijith",
-  number:"+918217629625"
-}
-
-let y = {...x}
-
-y.name = "Divya"

@@ -8,5 +8,5 @@ interface OnOrOff{
 
 interface SocketMessagePlayLoad{
     event:string,
-    data: any
+    data: any,
 }

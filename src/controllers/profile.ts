@@ -5,7 +5,6 @@ import { ClientIssue, handleException } from "../config/ClientIssue";
 
 export const ProfileContorller = {
   async   updateProfile(req: ApiRequest, res: Response, next: NextFunction) {
-    console.log(req.file?.path);
     try {
       let userName = req.tokenPayload?.user_name;
       if (userName) {
@@ -24,7 +23,6 @@ export const ProfileContorller = {
   async getProfileDetails(req: ApiRequest, res: Response, next: NextFunction) {
     try {
       let userName = req.params.user_name ?? req.tokenPayload?.user_name;
-      console.log("Payload => ",req.tokenPayload)
       if (userName) {
         let user = await findUserByUsername(userName);
         if (user) {
