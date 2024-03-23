@@ -1,4 +1,4 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { JWTSecretKey, JwtSignOptions } from "../config/jwt";
 
 export interface AppJwtPayload {

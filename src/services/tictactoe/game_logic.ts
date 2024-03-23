@@ -1,23 +1,3 @@
-import http from "http";
-import WebSocket from 'ws';
-
-export async function startTicTacToeService(app:Express.Application,onStart:(port:number)=>void) {
-  
-  const server = http.createServer(app);
-  const wss = new WebSocket.Server({ server });
-  wss.on("connection", (ws)=>{
-    console.log("client got connected")
-    ws.on("message", (message)=>{
-      console.log("message => ",message)
-      ws.send(`server saw your message => ${message}`)
-    })
-  })
-  server.listen(5036,()=>{
-    onStart(5036)
-  })
-
-}
-
 type Player = 1 | 0 | -1;
 
 type Board = Player[][];
