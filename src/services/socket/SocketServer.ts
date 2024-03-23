@@ -7,13 +7,14 @@ import { JsonWebTokenError } from "jsonwebtoken";
 import { connectionHandler } from "./ConnectionHandler";
 import { SocketKeys } from "../../models/socket/SocketKeys";
 import { Request } from "express";
-export let sockeetInterceptor: ((
+
+export let wsEventsInterceptors: ((
   ws: WebSocket,
   payload: AppJwtPayload,
   message: WebSocket.RawData
 ) => void)[] = [];
 
-import "../tictactoe/usecase_play_req";
+import "../tictactoe/events/index";
 
 export async function startSocket(
   app: Express.Application,
@@ -24,8 +25,7 @@ export async function startSocket(
   const wss = new WebSocket.Server({ server });
 
   wss.on("connection", (ws, req: Request) => {
-    
-    console.log("Connection request recived")
+    console.log("Connection request recived");
 
     let token = req.headers.authorization?.split(" ")[1];
 
@@ -52,9 +52,9 @@ export async function startSocket(
           AuthIssueKeys.InvalidToken
         ).toString();
         ws.send(issue);
-      setTimeout(() => {
-        ws.close();
-      }, 3000);
+        setTimeout(() => {
+          ws.close();
+        }, 3000);
         return;
       }
       throw e;
@@ -74,7 +74,7 @@ export async function startSocket(
           console.log(`${payLoad.user_name} started observing players`);
           connectionHandler.observeConnecitonList(payLoad.user_name);
         }
-        sockeetInterceptor.forEach((it) => it(ws, payLoad, message));
+        wsEventsInterceptors.forEach((it) => it(ws, payLoad, message));
         console.log(incomingMessage);
       } catch (e) {
         console.log(e);
