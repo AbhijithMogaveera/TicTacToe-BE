@@ -16,9 +16,9 @@ export let wsConnectionStateChangeInterceptors: ((
   ws: WebSocket,
   payload: AppJwtPayload,
   isConnected: boolean
-) => void)[];
+) => void)[] = [];
 
-import "./tictactoe/events/index";
+import "./tictactoe/index";
 import "./connection_handler/index";
 
 export async function startSocket(
