@@ -1,13 +1,13 @@
 import { GameEvents, GameIssues, PLAY_REQ_TIME_OUT } from "./event_names";
-import { findUserByUsername } from "../../profile";
-import { connectionHandler } from "../../socket/ConnectionHandler";
-import { wsEventsInterceptors } from "../../socket/SocketServer";
+import { findUserByUsername } from "../../../rest/profile";
+import { wsMessageInterceptors } from "../../SocketServer";
 import { v4 as uuidv4 } from "uuid";
 import { activePlayRequest } from "./state";
-import { UserMeta } from "../../../models/socket/UserMeta";
+import { UserMeta } from "../../../../models/socket/UserMeta";
 import { suspendInvitation } from "./util";
+import { getConnectionByUserName } from "../../connection_handler/connection_handler";
 
-wsEventsInterceptors.push(async (_ws, payload, message) => {
+wsMessageInterceptors.push(async (_ws, payload, message) => {
   try {
     let participant: SocketMessagePlayLoad = JSON.parse(message.toString());
     if (participant.event !== GameEvents.ASK_TO_PLAY) {
@@ -29,21 +29,21 @@ wsEventsInterceptors.push(async (_ws, payload, message) => {
       profile_image: user.profile_picture,
       user_name: user.user_name,
     };
-    connectionHandler.getConnectionByUserName(otherUserName)?.ws.send(
+    getConnectionByUserName(otherUserName)?.ws.send(
       JSON.stringify({
         event: GameEvents.PLAY_REQ,
         participant: meta,
         invitationID: id,
       })
     );
-    connectionHandler.getConnectionByUserName(payload.user_name)?.ws.send(
+    getConnectionByUserName(payload.user_name)?.ws.send(
       JSON.stringify({
         event: GameEvents.ASK_TO_PLAY,
         playRequestId: id,
       })
     );
     setTimeout(() => {
-      suspendInvitation(id, true)
+      suspendInvitation(id, true);
     }, PLAY_REQ_TIME_OUT);
   } catch (e) {
     console.log(e);

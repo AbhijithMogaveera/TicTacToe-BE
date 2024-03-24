@@ -1,9 +1,9 @@
 import { GameEvents } from "./event_names";
-import { connectionHandler } from "../../socket/ConnectionHandler";
-import { wsEventsInterceptors } from "../../socket/SocketServer";
+import { wsMessageInterceptors } from "../../SocketServer";
 import { activePlayRequest } from "./state";
+import { getConnectionByUserName } from "../../connection_handler/connection_handler";
 
-wsEventsInterceptors.push(async (_ws, _payload, message) => {
+wsMessageInterceptors.push(async (_ws, _payload, message) => {
   try {
     let messagePayload: SocketMessagePlayLoad = JSON.parse(message.toString());
     if (messagePayload.event !== GameEvents.PLAY_REQ_REJECT) {
@@ -12,7 +12,7 @@ wsEventsInterceptors.push(async (_ws, _payload, message) => {
     let reqID: string = messagePayload.data;
     let req = activePlayRequest[reqID];
     if (!req) {
-      console.log("active play request not found for "+reqID)
+      console.log("active play request not found for " + reqID);
       return;
     }
     let data = JSON.stringify({
@@ -20,8 +20,8 @@ wsEventsInterceptors.push(async (_ws, _payload, message) => {
       isAccepted: false,
       event: GameEvents.PLAY_REQ_REJECT,
     });
-    connectionHandler.getConnectionByUserName(req.p1_user_name)?.ws.send(data)??console.log("connection not found for "+req.p1_user_name);
-    connectionHandler.getConnectionByUserName(req.p2_user_name)?.ws.send(data)??console.log("connection not found for "+req.p1_user_name);
+    getConnectionByUserName(req.p1_user_name)?.ws.send(data);
+    getConnectionByUserName(req.p2_user_name)?.ws.send(data);
     delete activePlayRequest[reqID];
   } catch (e) {
     console.log(e);

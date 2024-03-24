@@ -4,17 +4,22 @@ import { AuthIssueKeys } from "../../config/ClientIssue";
 import { ClientError } from "../../error/error";
 import { AppJwtPayload, TokenManager } from "../../util/jwt";
 import { JsonWebTokenError } from "jsonwebtoken";
-import { connectionHandler } from "./ConnectionHandler";
-import { SocketKeys } from "../../models/socket/SocketKeys";
 import { Request } from "express";
 
-export let wsEventsInterceptors: ((
+export let wsMessageInterceptors: ((
   ws: WebSocket,
   payload: AppJwtPayload,
   message: WebSocket.RawData
 ) => void)[] = [];
 
-import "../tictactoe/events/index";
+export let wsConnectionStateChangeInterceptors: ((
+  ws: WebSocket,
+  payload: AppJwtPayload,
+  isConnected: boolean
+) => void)[];
+
+import "./tictactoe/events/index";
+import "./connection_handler/index";
 
 export async function startSocket(
   app: Express.Application,
@@ -60,22 +65,11 @@ export async function startSocket(
       throw e;
     }
 
-    connectionHandler.addConnection({
-      ws,
-      user_name: payLoad.user_name,
-    });
+    wsConnectionStateChangeInterceptors.forEach((it) => it(ws, payLoad, true));
 
     ws.on("message", (message) => {
       try {
-        let incomingMessage: SocketMessagePlayLoad = JSON.parse(
-          message.toString()
-        );
-        if (incomingMessage.event === SocketKeys.activePlayer) {
-          console.log(`${payLoad.user_name} started observing players`);
-          connectionHandler.observeConnecitonList(payLoad.user_name);
-        }
-        wsEventsInterceptors.forEach((it) => it(ws, payLoad, message));
-        console.log(incomingMessage);
+        wsMessageInterceptors.forEach((it) => it(ws, payLoad, message));
       } catch (e) {
         console.log(e);
         ws.send("Recived invalid josn format message");
@@ -83,7 +77,9 @@ export async function startSocket(
     });
 
     ws.on("close", () => {
-      connectionHandler.removeConnection(payLoad.user_name);
+      wsConnectionStateChangeInterceptors.forEach((it) =>
+        it(ws, payLoad, true)
+      );
     });
   });
 

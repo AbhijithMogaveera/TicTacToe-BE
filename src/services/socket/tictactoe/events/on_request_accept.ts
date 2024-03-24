@@ -1,11 +1,11 @@
 import { GameEvents } from "./event_names";
-import { connectionHandler } from "../../socket/ConnectionHandler";
-import { wsEventsInterceptors } from "../../socket/SocketServer";
+import { wsMessageInterceptors } from "../../SocketServer";
 import { activeGame, activePlayRequest } from "./state";
 import TicTacToe from "../game_logic";
 import { generateKey, suspendInvitation } from "./util";
+import { getConnectionByUserName } from "../../connection_handler/connection_handler";
 
-wsEventsInterceptors.push(async (_ws, _payload, message) => {
+wsMessageInterceptors.push(async (_ws, _payload, message) => {
   try {
     let messagePayload: SocketMessagePlayLoad = JSON.parse(message.toString());
 
@@ -40,14 +40,9 @@ wsEventsInterceptors.push(async (_ws, _payload, message) => {
       isAccepted: true,
       invitation_id: invitationId,
     });
-    connectionHandler
-      .getConnectionByUserName(req.p1_user_name)
-      ?.ws.send(eventPayload) ??
-      console.log("connection not found for " + req.p1_user_name);
-    connectionHandler
-      .getConnectionByUserName(req.p2_user_name)
-      ?.ws.send(eventPayload) ??
-      console.log("connection not found for " + req.p1_user_name);
+
+    getConnectionByUserName(req.p1_user_name)?.ws.send(eventPayload)
+    getConnectionByUserName(req.p2_user_name)?.ws.send(eventPayload) 
     suspendInvitation(invitationId, false);
   } catch (e) {
     console.log(e);

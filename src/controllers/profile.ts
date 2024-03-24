@@ -1,10 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiRequest } from "../core/Request";
-import { findUserByUsername, updateProfileDeatils } from "../services/profile";
+import {
+  findUserByUsername,
+  updateProfileDeatils,
+} from "../services/rest/profile";
 import { ClientIssue, handleException } from "../config/ClientIssue";
 
 export const ProfileContorller = {
-  async   updateProfile(req: ApiRequest, res: Response, next: NextFunction) {
+  async updateProfile(req: ApiRequest, res: Response, next: NextFunction) {
     try {
       let userName = req.tokenPayload?.user_name;
       if (userName) {
@@ -13,10 +16,10 @@ export const ProfileContorller = {
           user_name: userName,
           bio: req.body.bio,
         });
-        next()
+        next();
       }
     } catch (e) {
-        handleException(res, e)
+      handleException(res, e);
     }
   },
 
@@ -28,15 +31,15 @@ export const ProfileContorller = {
         if (user) {
           res.status(200).send(user);
         } else {
-          let issue:ClientIssue = {
-            key:"ResourceNotFound",
-            message:`User with user_name ${userName} not found`
+          let issue: ClientIssue = {
+            key: "ResourceNotFound",
+            message: `User with user_name ${userName} not found`,
           };
           res.status(400).send(issue);
         }
       } else throw "Un authorised user";
     } catch (error) {
-        handleException(res, error)
+      handleException(res, error);
     }
   },
 };

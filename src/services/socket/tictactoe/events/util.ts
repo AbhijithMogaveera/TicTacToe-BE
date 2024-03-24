@@ -1,4 +1,4 @@
-import { connectionHandler } from "../../socket/ConnectionHandler";
+import { getConnectionByUserName } from "../../connection_handler/connection_handler";
 import { GameEvents } from "./event_names";
 import { activePlayRequest } from "./state";
 
@@ -20,8 +20,8 @@ export function suspendInvitation(
   if (notifySuspension) {
     let { p1_user_name, p2_user_name } = activeRequest;
     [
-      connectionHandler.getConnectionByUserName(p1_user_name),
-      connectionHandler.getConnectionByUserName(p2_user_name),
+      getConnectionByUserName(p1_user_name),
+      getConnectionByUserName(p2_user_name),
     ].forEach((it) => {
       it?.ws.send(
         JSON.stringify({
