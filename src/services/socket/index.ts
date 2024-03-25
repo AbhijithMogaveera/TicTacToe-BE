@@ -6,32 +6,39 @@ import { AppJwtPayload, TokenManager } from "../../util/jwt";
 import { JsonWebTokenError } from "jsonwebtoken";
 import { Request } from "express";
 
-export let wsMessageInterceptors: ((
+export let wsIncommingMessageInterceptors: ((
   ws: WebSocket,
   payload: AppJwtPayload,
   message: WebSocket.RawData
 ) => void)[] = [];
 
+export let wsOutGoingMessageInterceptors:((
+  ws:WebSocket,
+  message:BufferLike,
+  user_name:string | undefined
+)=>void)[] = []
+
 export let wsConnectionStateChangeInterceptors: ((
   ws: WebSocket,
   payload: AppJwtPayload,
   isConnected: boolean
-) => void)[] = [];
-
+) => Promise<void>)[] = [];
+import "./logger/index";
 import "./tictactoe/index";
 import "./connection_handler/index";
+import { BufferLike, send } from "./wrapper/WebSocket";
 
 export async function startSocket(
   app: Express.Application,
   onStart: (port: number) => void
 ) {
+  console.log("hee here herere")
   const server = http.createServer(app);
 
   const wss = new WebSocket.Server({ server });
 
-  wss.on("connection", (ws, req: Request) => {
-    console.log("Connection request recived");
-
+  wss.on("connection", async (ws, req: Request) => {
+    console.log("connection created")
     let token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -39,7 +46,7 @@ export async function startSocket(
         AuthIssueKeys.MissingToken,
         "Please provide token"
       ).toString();
-      ws.send(issue);
+      send(ws, issue);
       setTimeout(() => {
         ws.close();
       }, 3000);
@@ -56,7 +63,7 @@ export async function startSocket(
           e.message + token,
           AuthIssueKeys.InvalidToken
         ).toString();
-        ws.send(issue);
+        send(ws, issue);
         setTimeout(() => {
           ws.close();
         }, 3000);
@@ -65,21 +72,25 @@ export async function startSocket(
       throw e;
     }
 
-    wsConnectionStateChangeInterceptors.forEach((it) => it(ws, payLoad, true));
+    for(let i = 0; i<wsConnectionStateChangeInterceptors.length; i++){
+      await wsConnectionStateChangeInterceptors[i](ws, payLoad, true)
+    }
 
     ws.on("message", (message) => {
       try {
-        wsMessageInterceptors.forEach((it) => it(ws, payLoad, message));
+        wsIncommingMessageInterceptors.forEach((it) =>
+          it(ws, payLoad, message)
+        );
       } catch (e) {
         console.log(e);
-        ws.send("Recived invalid josn format message");
+        send(ws, "Recived invalid josn format message");
       }
     });
 
-    ws.on("close", () => {
-      wsConnectionStateChangeInterceptors.forEach((it) =>
-        it(ws, payLoad, true)
-      );
+    ws.on("close", async () => {
+      for(let i = 0; i<wsConnectionStateChangeInterceptors.length; i++){
+        await wsConnectionStateChangeInterceptors[i](ws, payLoad, false)
+      }
     });
   });
 

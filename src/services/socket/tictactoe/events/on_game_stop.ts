@@ -1,7 +1,7 @@
-import { wsMessageInterceptors } from "../../SocketServer";
+import { wsIncommingMessageInterceptors } from "../..";
 import { GameEvents } from "./event_names";
 
-wsMessageInterceptors.push((ws, payload, message) => {
+wsIncommingMessageInterceptors.push((ws, payload, message) => {
   let messagePayload: SocketMessagePlayLoad = JSON.parse(message.toString());
   if (messagePayload.event !== GameEvents.GAME_STOP) {
     return;

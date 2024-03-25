@@ -1,6 +1,4 @@
-import {
-  wsConnectionStateChangeInterceptors,
-} from "../SocketServer";
+import { wsConnectionStateChangeInterceptors } from "..";
 
 import { UserMeta } from "../../../models/socket/UserMeta";
 import { findUserByUsername } from "../../rest/profile";
@@ -14,7 +12,6 @@ export let connections: {
       }
     | undefined;
 } = {};
-
 
 async function addConnection({
   ws,
@@ -37,11 +34,8 @@ async function addConnection({
       user_name,
     },
   };
-
   return true;
 }
-
-
 
 function removeConnection(userName: string) {
   delete connections[userName];
@@ -54,9 +48,9 @@ export function getConnectionByUserName(user_name: string) {
   return connections[user_name];
 }
 
-wsConnectionStateChangeInterceptors.push((ws, payload, isConnected) => {
+wsConnectionStateChangeInterceptors.push(async (ws, payload, isConnected) => {
   if (isConnected) {
-    addConnection({
+    await addConnection({
       ws,
       user_name: payload.user_name,
     });
@@ -64,7 +58,10 @@ wsConnectionStateChangeInterceptors.push((ws, payload, isConnected) => {
     removeConnection(payload.user_name);
   }
 });
-
-
-
-
+async function delay(){
+  return new Promise((resolve, reject)=>{
+    setTimeout(()=>{
+      resolve(10)
+    }, 1000*10)
+  })
+}

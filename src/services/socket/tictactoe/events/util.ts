@@ -1,4 +1,5 @@
 import { getConnectionByUserName } from "../../connection_handler/connection_handler";
+import { send } from "../../wrapper/WebSocket";
 import { GameEvents } from "./event_names";
 import { activePlayRequest } from "./state";
 
@@ -14,16 +15,13 @@ export function suspendInvitation(
 ) {
   const activeRequest = activePlayRequest[playReqId];
   if (!activeRequest) {
-    console.log("active play request not found for " + playReqId);
     return;
   }
   if (notifySuspension) {
     let { p1_user_name, p2_user_name } = activeRequest;
-    [
-      getConnectionByUserName(p1_user_name),
-      getConnectionByUserName(p2_user_name),
-    ].forEach((it) => {
-      it?.ws.send(
+    [p1_user_name, p2_user_name].forEach((it) => {
+      send(
+        it,
         JSON.stringify({
           event: GameEvents.PLAY_REQ_REVOKE,
           playReqId,
@@ -32,5 +30,4 @@ export function suspendInvitation(
     });
   }
   delete activePlayRequest[playReqId];
-  console.log("delete active play request", activeRequest);
 }

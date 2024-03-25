@@ -1,13 +1,14 @@
 import { GameEvents, GameIssues, PLAY_REQ_TIME_OUT } from "./event_names";
 import { findUserByUsername } from "../../../rest/profile";
-import { wsMessageInterceptors } from "../../SocketServer";
+import { wsConnectionStateChangeInterceptors, wsIncommingMessageInterceptors } from "../..";
 import { v4 as uuidv4 } from "uuid";
 import { activePlayRequest } from "./state";
 import { UserMeta } from "../../../../models/socket/UserMeta";
 import { suspendInvitation } from "./util";
 import { getConnectionByUserName } from "../../connection_handler/connection_handler";
+import { send } from "../../wrapper/WebSocket";
 
-wsMessageInterceptors.push(async (_ws, payload, message) => {
+wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
   try {
     let participant: SocketMessagePlayLoad = JSON.parse(message.toString());
     if (participant.event !== GameEvents.ASK_TO_PLAY) {
@@ -16,7 +17,6 @@ wsMessageInterceptors.push(async (_ws, payload, message) => {
     let otherUserName: string = participant.data;
     let user = (await findUserByUsername(otherUserName))!;
     if (!user) {
-      console.log(GameIssues.userNotFoung(otherUserName));
       return;
     }
     let id = uuidv4();
@@ -29,14 +29,16 @@ wsMessageInterceptors.push(async (_ws, payload, message) => {
       profile_image: user.profile_picture,
       user_name: user.user_name,
     };
-    getConnectionByUserName(otherUserName)?.ws.send(
+    send(
+      otherUserName,
       JSON.stringify({
         event: GameEvents.PLAY_REQ,
         participant: meta,
         invitationID: id,
       })
     );
-    getConnectionByUserName(payload.user_name)?.ws.send(
+    send(
+      payload.user_name,
       JSON.stringify({
         event: GameEvents.ASK_TO_PLAY,
         playRequestId: id,
@@ -45,6 +47,15 @@ wsMessageInterceptors.push(async (_ws, payload, message) => {
     setTimeout(() => {
       suspendInvitation(id, true);
     }, PLAY_REQ_TIME_OUT);
+
+    wsConnectionStateChangeInterceptors.push(async (ws, paylod2, isConnected)=>{
+      if(payload.user_name === paylod2.user_name || otherUserName === paylod2.user_name){
+        if(!isConnected){
+          suspendInvitation(id, true)
+        }
+      }
+    })
+    
   } catch (e) {
     console.log(e);
   }

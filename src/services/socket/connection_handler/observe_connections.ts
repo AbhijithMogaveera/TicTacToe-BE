@@ -2,9 +2,10 @@ import { SocketKeys } from "../../../models/socket/SocketKeys";
 import { UserMeta } from "../../../models/socket/UserMeta";
 import {
   wsConnectionStateChangeInterceptors,
-  wsMessageInterceptors,
-} from "../SocketServer";
+  wsIncommingMessageInterceptors,
+} from "..";
 import { connections } from "./connection_handler";
+import { send } from "../wrapper/WebSocket";
 
 let activeConnetcionsObserver: string[] = [];
 
@@ -14,34 +15,29 @@ function broadCastUpdatedConnectionsList() {
     const connection = connections[user_name];
     if (connection) {
       activeusersMeta.push(connection.meta);
-    } else {
-      console.log("connection not for " + user_name);
     }
   }
   activeConnetcionsObserver.forEach((user_name) => {
     try {
       const connection = connections[user_name];
       if (connection) {
-        connection.ws.send(
+        send(
+          user_name,
           JSON.stringify({
             event: SocketKeys.activePlayer,
             data: activeusersMeta,
           })
         );
-      } else {
-        console.log("connection not found for " + user_name);
       }
     } catch (error) {
       console.log(error);
     }
   });
-  console.log("Update broadcast to ", activeConnetcionsObserver);
 }
 
 function broadCastUpdatedConnectionsListTo(user_name: string) {
   const connection = connections[user_name];
   if (!connection) {
-    console.log("connection not found for " + user_name);
     return;
   }
   let arr: UserMeta[] = [];
@@ -51,7 +47,8 @@ function broadCastUpdatedConnectionsListTo(user_name: string) {
       arr.push(connection.meta);
     }
   }
-  connection.ws.send(
+  send(
+    user_name,
     JSON.stringify({
       event: SocketKeys.activePlayer,
       data: arr,
@@ -69,19 +66,16 @@ function stopObserverConnectinList(user_name: string) {
   activeConnetcionsObserver.splice(index, 1);
 }
 
-wsMessageInterceptors.push((ws, payload, message) => {
+wsIncommingMessageInterceptors.push((ws, payload, message) => {
   let incomingMessage: SocketMessagePlayLoad = JSON.parse(message.toString());
   if (incomingMessage.event === SocketKeys.activePlayer) {
-    console.log(`${payload.user_name} started observing players`);
     observeConnecitonList(payload.user_name);
   }
 });
 
-wsConnectionStateChangeInterceptors.push((ws, payload, isConnected) => {
+wsConnectionStateChangeInterceptors.push(async (ws, payload, isConnected) => {
   if (!isConnected) {
-    broadCastUpdatedConnectionsList();
-  } else {
     stopObserverConnectinList(payload.user_name);
-    broadCastUpdatedConnectionsList();
   }
+  broadCastUpdatedConnectionsList();
 });
