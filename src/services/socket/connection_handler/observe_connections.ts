@@ -66,7 +66,7 @@ function stopObserverConnectinList(user_name: string) {
   activeConnetcionsObserver.splice(index, 1);
 }
 
-wsIncommingMessageInterceptors.push((ws, payload, message) => {
+wsIncommingMessageInterceptors.push(async (ws, payload, message) => {
   let incomingMessage: SocketMessagePlayLoad = JSON.parse(message.toString());
   if (incomingMessage.event === SocketKeys.activePlayer) {
     observeConnecitonList(payload.user_name);

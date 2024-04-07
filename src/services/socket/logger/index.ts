@@ -5,7 +5,8 @@ import {
 } from "..";
 import { BufferLike } from "../wrapper/WebSocket";
 
-if (false) {
+
+if (true) {
   wsConnectionStateChangeInterceptors.push(async (ws, payload, isConnected) => {
     if (isConnected) {
       console.log("\n", `connect :: 🟢 ${payload.user_name}`);
@@ -14,7 +15,7 @@ if (false) {
     }
   });
 
-  wsIncommingMessageInterceptors.push((ws, payload, message) => {
+  wsIncommingMessageInterceptors.push(async (ws, payload, message) => {
     console.log(
       "\n",
       "------------------------------",
@@ -27,7 +28,7 @@ if (false) {
     );
   });
 
-  wsOutGoingMessageInterceptors.push((ws, message, user_name) => {
+  wsOutGoingMessageInterceptors.push(async (ws, message, user_name) => {
     console.log(
       "\n",
       "------------------------------",

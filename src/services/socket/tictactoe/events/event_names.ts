@@ -7,6 +7,8 @@ export const GameEvents = {
   PLAY_REQ_REVOKE:"play_request_revoke",
   ASK_TO_PLAY: "ask_to_play",
   GAME:"game",
+  GAME_TAP_TILE: "game_tap_tile",
+  GAME_REMATCH:"game_rematch",
   GAME_STOP:"game_stop"
 };
 

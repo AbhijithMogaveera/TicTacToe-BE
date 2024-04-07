@@ -4,6 +4,7 @@ import { activeGame, activePlayRequest } from "./state";
 import TicTacToe from "../game_logic";
 import { generateKey, suspendInvitation } from "./util";
 import { send } from "../../wrapper/WebSocket";
+import { startGame } from "./game_session";
 
 wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {
   try {
@@ -31,15 +32,8 @@ wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {
         },
       ],
     };
-    let eventPayload = JSON.stringify({
-      event: GameEvents.GAME,
-      data: activeGame[activeGameKey],
-      isAccepted: true,
-      invitation_id: invitationId,
-    });
-    send(req.p1_user_name, eventPayload);
-    send(req.p2_user_name, eventPayload);
-    suspendInvitation(invitationId, false);
+    await suspendInvitation(invitationId, true);
+    await startGame(req.p1_user_name, req.p2_user_name)
   } catch (e) {
     console.log(e);
   }

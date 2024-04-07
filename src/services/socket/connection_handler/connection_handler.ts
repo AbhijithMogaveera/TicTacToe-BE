@@ -58,10 +58,3 @@ wsConnectionStateChangeInterceptors.push(async (ws, payload, isConnected) => {
     removeConnection(payload.user_name);
   }
 });
-async function delay(){
-  return new Promise((resolve, reject)=>{
-    setTimeout(()=>{
-      resolve(10)
-    }, 1000*10)
-  })
-}

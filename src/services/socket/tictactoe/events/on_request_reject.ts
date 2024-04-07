@@ -1,7 +1,6 @@
 import { GameEvents } from "./event_names";
 import { wsIncommingMessageInterceptors } from "../..";
 import { activePlayRequest } from "./state";
-import { getConnectionByUserName } from "../../connection_handler/connection_handler";
 import { send } from "../../wrapper/WebSocket";
 
 wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {
