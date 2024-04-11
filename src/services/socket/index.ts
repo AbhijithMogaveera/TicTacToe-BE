@@ -8,16 +8,21 @@ import { Request } from "express";
 
 export let wsIncommingMessageInterceptors: IncommingMessageInterceptor[] = [];
 export let wsOutGoingMessageInterceptors: OutGoingMessageInterceptor[] = [];
-export let wsConnectionStateChangeInterceptors: ConnectionStateInterceptor[] = [];
+export let wsConnectionStateChangeInterceptors: ConnectionStateInterceptor[] =
+  [];
 
-import { BufferLike, send } from "./wrapper/WebSocket";
-import { ConnectionStateInterceptor, IncommingMessageInterceptor, OutGoingMessageInterceptor } from "./types";
-import { ONE_SECOND } from "./tictactoe/events/util";
+import { send } from "./wrapper/WebSocket";
+import {
+  ConnectionStateInterceptor,
+  IncommingMessageInterceptor,
+  OutGoingMessageInterceptor,
+} from "./types";
+import { ONE_SECOND } from "./tictactoe/events_handlers/util";
 
 //scripts
 import "./logger/index";
-import "./tictactoe/index";
 import "./connection_handler/index";
+import "./tictactoe/index";
 
 export async function startSocket(
   app: Express.Application,
@@ -67,8 +72,8 @@ export async function startSocket(
 
     ws.on("message", async (message) => {
       try {
-        for(let i = 0; i<wsIncommingMessageInterceptors.length; i++){
-          await wsIncommingMessageInterceptors[i](ws, payLoad, message)
+        for (let i = 0; i < wsIncommingMessageInterceptors.length; i++) {
+          await wsIncommingMessageInterceptors[i](ws, payLoad, message);
         }
       } catch (e) {
         console.log(e);
