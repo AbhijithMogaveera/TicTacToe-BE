@@ -70,7 +70,7 @@ export async function startSocket(
       await wsConnectionStateChangeInterceptors[i](ws, payLoad, true);
     }
 
-    ws.on("message", async (message) => {
+    ws.on("message", async(message) => {
       try {
         for (let i = 0; i < wsIncommingMessageInterceptors.length; i++) {
           await wsIncommingMessageInterceptors[i](ws, payLoad, message);

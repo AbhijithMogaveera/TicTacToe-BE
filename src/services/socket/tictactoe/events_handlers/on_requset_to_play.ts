@@ -1,12 +1,15 @@
-import { GameEvents, GameIssues, PLAY_REQ_TIME_OUT } from "./event_names";
+import { GameEvents, PLAY_REQ_TIME_OUT } from "./event_names";
 import { findUserByUsername } from "../../../rest/profile";
-import { wsConnectionStateChangeInterceptors, wsIncommingMessageInterceptors } from "../..";
+import {
+  wsConnectionStateChangeInterceptors,
+  wsIncommingMessageInterceptors,
+} from "../..";
 import { v4 as uuidv4 } from "uuid";
 import { activePlayRequest } from "./state";
 import { UserMeta } from "../../../../models/socket/UserMeta";
 import { suspendInvitation } from "./util";
-import { getConnectionByUserName } from "../../connection_handler/connection_handler";
 import { send } from "../../wrapper/WebSocket";
+import { ConnectionStateInterceptor } from "../../types";
 
 wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
   try {
@@ -44,18 +47,31 @@ wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
         playRequestId: id,
       })
     );
-    setTimeout(() => {
+    let connectionStateInterceptor: ConnectionStateInterceptor 
+    function suspendInvitation2() {
       suspendInvitation(id, true);
+      let index = wsConnectionStateChangeInterceptors.indexOf(connectionStateInterceptor);
+      wsConnectionStateChangeInterceptors.slice(index);
+    }
+    setTimeout(() => {
+      suspendInvitation2();
     }, PLAY_REQ_TIME_OUT);
 
-    wsConnectionStateChangeInterceptors.push(async (ws, paylod2, isConnected)=>{
-      if(payload.user_name === paylod2.user_name || otherUserName === paylod2.user_name){
-        if(!isConnected){
-          suspendInvitation(id, true)
+    connectionStateInterceptor  = async (
+      ws,
+      paylod2,
+      isConnected
+    ) => {
+      if (
+        payload.user_name === paylod2.user_name ||
+        otherUserName === paylod2.user_name
+      ) {
+        if (!isConnected) {
+          suspendInvitation2();
         }
       }
-    })
-    
+    };
+    wsConnectionStateChangeInterceptors.push(connectionStateInterceptor);
   } catch (e) {
     console.log(e);
   }

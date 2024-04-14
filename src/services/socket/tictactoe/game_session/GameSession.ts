@@ -11,6 +11,7 @@ import WebSocket from "ws";
 import {
   ActiveGameSession,
   GameState,
+  PlayerSessionMeta,
   TileState,
   activeGameSession,
   defalutTileState,
@@ -21,6 +22,7 @@ import {
 } from "../../types";
 import { v4 } from "uuid";
 import { checkForWinner } from "./util";
+import { delay } from "../../../../util/timeout";
 
 export class GameSessionSessionHandler {
   key: string;
@@ -37,6 +39,7 @@ export class GameSessionSessionHandler {
     if (!p1Meta || !p2Meta) {
       throw "player not fond :)";
     }
+    delete activeGameSession[this.key]
     if (!activeGameSession[this.key]) {
       activeGameSession[this.key] = {
         board: {
@@ -62,6 +65,12 @@ export class GameSessionSessionHandler {
     this.updateGameState(activeGameSession[this.key]);
     this.notifyGameStateChanged();
   }
+  getAllPlayer():PlayerSessionMeta[]{
+    return [
+      this.getGameState().player_1,
+      this.getGameState().player_2
+    ]
+  }
   private setUpConnectionInterceptor(
     p1_user_uame: string,
     p2_user_name: string
@@ -71,7 +80,7 @@ export class GameSessionSessionHandler {
       payload: AppJwtPayload,
       isConnected: boolean
     ) => {
-      const endsIn = ONE_SECOND * 10;
+      const endsIn = ONE_SECOND * 20;
       let gameState = this.getGameState();
       if (payload.user_name == p1_user_uame) {
         if (isConnected) {
@@ -79,24 +88,22 @@ export class GameSessionSessionHandler {
           this.updateGameState({
             ...gameState,
             player_1: {
-              ...this.getGameState().player_1,
+              ...gameState.player_1,
               isActive: true,
             },
             gameState: GameState.OnGoing,
             gameWillEndIn: undefined,
           });
-          await this.notifyGameStateChanged();
         } else {
           this.updateGameState({
             ...gameState,
             player_1: {
-              ...this.getGameState().player_1,
+              ...gameState.player_1,
               isActive: false,
             },
             gameState: GameState.PlayerLostAboutToEndInOneMinute,
             gameWillEndIn: endsIn,
           });
-          await this.notifyStopGameTimerIsRunning();
           this.p1TimeOut = setTimeout(() => {
             this.stopGame();
           }, endsIn);
@@ -108,31 +115,30 @@ export class GameSessionSessionHandler {
           this.updateGameState({
             ...gameState,
             player_2: {
-              ...this.getGameState().player_2,
+              ...gameState.player_2,
               isActive: true,
             },
             gameState: GameState.OnGoing,
             gameWillEndIn: undefined,
           });
-          await this.notifyGameStateChanged();
         } else {
           this.updateGameState({
             ...gameState,
             player_2: {
-              ...this.getGameState().player_2,
+              ...gameState.player_2,
               isActive: false,
             },
             gameState: GameState.PlayerLostAboutToEndInOneMinute,
             gameWillEndIn: endsIn,
           });
-          await this.notifyStopGameTimerIsRunning();
           this.p2TimeOut = setTimeout(() => {
             this.stopGame();
           }, endsIn);
         }
       }
+      await this.notifyGameStateChanged();
     };
-    wsIncommingMessageInterceptors.push(this.incommingMessageInterceptor);
+    wsConnectionStateChangeInterceptors.push(this.connectionStateInterceptor);
   }
 
   private setUpMessageInterceptor(p1_user_uame: string, p2_user_name: string) {
@@ -150,6 +156,9 @@ export class GameSessionSessionHandler {
             message.toString()
           );
           let event = data.event;
+          if(event == GameEvents.GAME){
+            this.notifyGameStateChanged().then()
+          }
           if (event == GameEvents.GAME_TAP_TILE) {
             this.onTileTap(payload.user_name, data.data);
           }
@@ -157,9 +166,11 @@ export class GameSessionSessionHandler {
             this.stopGame();
           }
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error)
+      }
     };
-    wsConnectionStateChangeInterceptors.push(this.connectionStateInterceptor);
+    wsIncommingMessageInterceptors.push(this.incommingMessageInterceptor);
   }
 
   async notifyStopGameTimerIsRunning() {
@@ -194,11 +205,13 @@ export class GameSessionSessionHandler {
     try {
       await send(this.p1_user_uame, messagePayload);
     } catch (error) {
+      console.log("hehe >> P1 >> ")
       console.log(error);
     }
     try {
       await send(this.p2_user_name, messagePayload);
     } catch (error) {
+      console.log("hehe >> P2 >> ")
       console.log(error);
     }
   }
@@ -211,7 +224,6 @@ export class GameSessionSessionHandler {
       return this.getGameState().player_2;
     }
   }
-
   async onTileTap(player: string, postion: number) {
     let gameState = this.getGameState();
     if (gameState.current_turn == player) {
@@ -256,7 +268,6 @@ export class GameSessionSessionHandler {
       }
     }
   }
-
   async stopGame() {
     if (activeGameSession[this.key]) {
       let connectionStateInterceptorIndex =
@@ -279,9 +290,11 @@ export class GameSessionSessionHandler {
         ...activeGameSession[this.key],
         gameState: GameState.End,
       });
+      clearTimeout(this.p1TimeOut)
+      clearTimeout(this.p2TimeOut)
       await this.notifyGameStateChanged();
-      console.log("Game ended >> :)");
       delete activeGameSession[this.key];
     }
   }
 }
+

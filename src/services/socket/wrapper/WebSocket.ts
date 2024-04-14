@@ -37,6 +37,7 @@ export async function send(
           else accept();
         });
       } else {
+        reject()
         console.log("connection not found for ", to);
       }
     }
@@ -45,7 +46,7 @@ export async function send(
         wsOutGoingMessageInterceptors.forEach((it) => {
           it(to, data, undefined);
         });
-        to?.send(data, (error) => {
+        to.send(data, (error) => {
           if (error) reject(error);
           else accept();
         });

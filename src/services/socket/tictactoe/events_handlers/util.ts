@@ -1,3 +1,4 @@
+import e from "express";
 import { send } from "../../wrapper/WebSocket";
 import { GameEvents } from "./event_names";
 import { activePlayRequest } from "./state";
@@ -22,20 +23,28 @@ export async function suspendInvitation(
   }
   if (notifySuspension) {
     let { p1_user_name, p2_user_name } = activeRequest;
-    await send(
-      p1_user_name,
-      JSON.stringify({
-        event: GameEvents.PLAY_REQ_REVOKE,
-        playReqId,
-      })
-    );
-    await send(
-      p2_user_name,
-      JSON.stringify({
-        event: GameEvents.PLAY_REQ_REVOKE,
-        playReqId,
-      })
-    );
+    try {
+      await send(
+        p1_user_name,
+        JSON.stringify({
+          event: GameEvents.PLAY_REQ_REVOKE,
+          playReqId,
+        })
+      );       
+    } catch (error) {
+      console.log(error)
+    }
+    try{
+      await send(
+        p2_user_name,
+        JSON.stringify({
+          event: GameEvents.PLAY_REQ_REVOKE,
+          playReqId,
+        })
+      );
+    }catch(error){
+      console.log(error)
+    }
   }
   delete activePlayRequest[playReqId];
 }
