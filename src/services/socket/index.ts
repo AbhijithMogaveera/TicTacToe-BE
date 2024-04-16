@@ -11,7 +11,7 @@ export let wsOutGoingMessageInterceptors: OutGoingMessageInterceptor[] = [];
 export let wsConnectionStateChangeInterceptors: ConnectionStateInterceptor[] =
   [];
 
-import { send } from "./wrapper/WebSocket";
+import { emitData } from "./wrapper/WebSocket";
 import {
   ConnectionStateInterceptor,
   IncommingMessageInterceptor,
@@ -40,7 +40,7 @@ export async function startSocket(
         AuthIssueKeys.MissingToken,
         "Please provide token"
       ).toString();
-      send(ws, issue);
+      emitData(issue).to(ws);
       setTimeout(() => {
         ws.close();
       }, 3000);
@@ -57,7 +57,7 @@ export async function startSocket(
           e.message + token,
           AuthIssueKeys.InvalidToken
         ).toString();
-        send(ws, issue);
+        emitData(issue).to(ws);
         setTimeout(() => {
           ws.close();
         }, ONE_SECOND * 3);
@@ -77,7 +77,9 @@ export async function startSocket(
         }
       } catch (e) {
         console.log(e);
-        send(ws, "Recived invalid josn format message");
+        emitData(
+          "Recived invalid josn format message"
+        ).to(ws, );
       }
     });
 

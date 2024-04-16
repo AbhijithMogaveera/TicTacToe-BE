@@ -20,10 +20,9 @@ export type BufferLike =
   | { valueOf(): string }
   | { [Symbol.toPrimitive](hint: string): string };
 
-export async function send(
+async function send(
   to: string | (WebSocket | undefined),
-  data: BufferLike,
-  cb?: (err?: Error) => void
+  data: BufferLike
 ): Promise<void> {
   return new Promise((accept, reject) => {
     if (typeof to === "string") {
@@ -37,7 +36,7 @@ export async function send(
           else accept();
         });
       } else {
-        reject()
+        reject();
         console.log("connection not found for ", to);
       }
     }
@@ -53,4 +52,11 @@ export async function send(
       }
     }
   });
+}
+export function emitData(data: BufferLike) {
+  return {
+    to: (...to: (string | WebSocket | undefined)[]) => {
+      return Promise.allSettled(to.map((it) => send(it, data)));
+    },
+  };
 }

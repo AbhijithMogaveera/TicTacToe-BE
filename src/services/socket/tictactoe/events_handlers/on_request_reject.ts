@@ -1,7 +1,7 @@
 import { GameEvents } from "./event_names";
 import { wsIncommingMessageInterceptors } from "../..";
 import { activePlayRequest } from "./state";
-import { send } from "../../wrapper/WebSocket";
+import { emitData } from "../../wrapper/WebSocket";
 
 wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {
   try {
@@ -19,8 +19,7 @@ wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {
       isAccepted: false,
       event: GameEvents.PLAY_REQ_REJECT,
     });
-    send(req.p1_user_name, data);
-    send(req.p2_user_name, data);
+    emitData(data).to(req.p1_user_name, req.p2_user_name)
     delete activePlayRequest[reqID];
   } catch (e) {
     console.log(e);

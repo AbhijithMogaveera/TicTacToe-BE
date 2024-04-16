@@ -1,5 +1,6 @@
 import { GameEvents, PLAY_REQ_TIME_OUT } from "./event_names";
 import { findUserByUsername } from "../../../rest/profile";
+
 import {
   wsConnectionStateChangeInterceptors,
   wsIncommingMessageInterceptors,
@@ -8,9 +9,8 @@ import { v4 as uuidv4 } from "uuid";
 import { activePlayRequest } from "./state";
 import { UserMeta } from "../../../../models/socket/UserMeta";
 import { suspendInvitation } from "./util";
-import { send } from "../../wrapper/WebSocket";
+import { emitData } from "../../wrapper/WebSocket";
 import { ConnectionStateInterceptor } from "../../types";
-
 wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
   try {
     let participant: SocketMessagePlayLoad = JSON.parse(message.toString());
@@ -18,7 +18,7 @@ wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
       return;
     }
     let otherUserName: string = participant.data;
-    let user = (await findUserByUsername(otherUserName))!;
+    let user = (await findUserByUsername(payload.user_name))!;
     if (!user) {
       return;
     }
@@ -32,36 +32,34 @@ wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
       profile_image: user.profile_picture,
       user_name: user.user_name,
     };
-    send(
-      otherUserName,
-      JSON.stringify({
-        event: GameEvents.PLAY_REQ,
-        participant: meta,
-        invitationID: id,
-      })
-    );
-    send(
-      payload.user_name,
-      JSON.stringify({
-        event: GameEvents.ASK_TO_PLAY,
-        playRequestId: id,
-      })
-    );
-    let connectionStateInterceptor: ConnectionStateInterceptor 
+    await Promise.allSettled([
+      emitData(
+        JSON.stringify({
+          event: GameEvents.PLAY_REQ,
+          participant: meta,
+          invitationID: id,
+        })
+      ).to(otherUserName),
+      emitData(
+        JSON.stringify({
+          event: GameEvents.ASK_TO_PLAY,
+          playRequestId: id,
+        })
+      ).to(payload.user_name),
+    ]);
+    let connectionStateInterceptor: ConnectionStateInterceptor;
     function suspendInvitation2() {
       suspendInvitation(id, true);
-      let index = wsConnectionStateChangeInterceptors.indexOf(connectionStateInterceptor);
+      let index = wsConnectionStateChangeInterceptors.indexOf(
+        connectionStateInterceptor
+      );
       wsConnectionStateChangeInterceptors.slice(index);
     }
     setTimeout(() => {
       suspendInvitation2();
     }, PLAY_REQ_TIME_OUT);
 
-    connectionStateInterceptor  = async (
-      ws,
-      paylod2,
-      isConnected
-    ) => {
+    connectionStateInterceptor = async (ws, paylod2, isConnected) => {
       if (
         payload.user_name === paylod2.user_name ||
         otherUserName === paylod2.user_name

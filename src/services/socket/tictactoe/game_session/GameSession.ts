@@ -2,7 +2,7 @@ import {
   wsConnectionStateChangeInterceptors,
   wsIncommingMessageInterceptors,
 } from "../..";
-import { send } from "../../wrapper/WebSocket";
+import { emitData } from "../../wrapper/WebSocket";
 import { GameEvents } from "../events_handlers/event_names";
 import { ONE_SECOND, generateKey } from "../events_handlers/util";
 import { getConnectionByUserName } from "../../connection_handler/connection_handler";
@@ -22,7 +22,6 @@ import {
 } from "../../types";
 import { v4 } from "uuid";
 import { checkForWinner } from "./util";
-import { delay } from "../../../../util/timeout";
 
 export class GameSessionSessionHandler {
   key: string;
@@ -39,7 +38,7 @@ export class GameSessionSessionHandler {
     if (!p1Meta || !p2Meta) {
       throw "player not fond :)";
     }
-    delete activeGameSession[this.key]
+    delete activeGameSession[this.key];
     if (!activeGameSession[this.key]) {
       activeGameSession[this.key] = {
         board: {
@@ -65,11 +64,8 @@ export class GameSessionSessionHandler {
     this.updateGameState(activeGameSession[this.key]);
     this.notifyGameStateChanged();
   }
-  getAllPlayer():PlayerSessionMeta[]{
-    return [
-      this.getGameState().player_1,
-      this.getGameState().player_2
-    ]
+  getAllPlayer(): PlayerSessionMeta[] {
+    return [this.getGameState().player_1, this.getGameState().player_2];
   }
   private setUpConnectionInterceptor(
     p1_user_uame: string,
@@ -156,8 +152,8 @@ export class GameSessionSessionHandler {
             message.toString()
           );
           let event = data.event;
-          if(event == GameEvents.GAME){
-            this.notifyGameStateChanged().then()
+          if (event == GameEvents.GAME) {
+            this.notifyGameStateChanged().then();
           }
           if (event == GameEvents.GAME_TAP_TILE) {
             this.onTileTap(payload.user_name, data.data);
@@ -167,7 +163,7 @@ export class GameSessionSessionHandler {
           }
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     };
     wsIncommingMessageInterceptors.push(this.incommingMessageInterceptor);
@@ -202,20 +198,8 @@ export class GameSessionSessionHandler {
       ...this.getGameState(),
       event: GameEvents.GAME,
     });
-    try {
-      await send(this.p1_user_uame, messagePayload);
-    } catch (error) {
-      console.log("hehe >> P1 >> ")
-      console.log(error);
-    }
-    try {
-      await send(this.p2_user_name, messagePayload);
-    } catch (error) {
-      console.log("hehe >> P2 >> ")
-      console.log(error);
-    }
+    await emitData(messagePayload).to(this.p1_user_uame, this.p2_user_name);
   }
-
   getPlayerDetails(playerName: string) {
     if (playerName == this.getGameState().player_1.user_name) {
       return this.getGameState().player_1;
@@ -290,11 +274,10 @@ export class GameSessionSessionHandler {
         ...activeGameSession[this.key],
         gameState: GameState.End,
       });
-      clearTimeout(this.p1TimeOut)
-      clearTimeout(this.p2TimeOut)
+      clearTimeout(this.p1TimeOut);
+      clearTimeout(this.p2TimeOut);
       await this.notifyGameStateChanged();
       delete activeGameSession[this.key];
     }
   }
 }
-

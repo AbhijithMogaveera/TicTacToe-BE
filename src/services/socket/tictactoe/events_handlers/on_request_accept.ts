@@ -3,7 +3,6 @@ import { wsIncommingMessageInterceptors } from "../..";
 import { activeGame, activePlayRequest } from "./state";
 import TicTacToe from "../game_logic";
 import { generateKey, suspendInvitation } from "./util";
-import { send } from "../../wrapper/WebSocket";
 import { startGame } from "../game_session/util";
 
 wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {

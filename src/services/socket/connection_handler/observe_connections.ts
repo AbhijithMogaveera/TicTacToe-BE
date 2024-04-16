@@ -5,7 +5,7 @@ import {
   wsIncommingMessageInterceptors,
 } from "..";
 import { connections } from "./connection_handler";
-import { send } from "../wrapper/WebSocket";
+import { emitData } from "../wrapper/WebSocket";
 
 let activeConnetcionsObserver: string[] = [];
 
@@ -21,13 +21,12 @@ function broadCastUpdatedConnectionsList() {
     try {
       const connection = connections[user_name];
       if (connection) {
-        send(
-          user_name,
+        emitData(
           JSON.stringify({
             event: SocketKeys.activePlayer,
             data: activeusersMeta,
-          })
-        );
+          }),
+        ).to(user_name);
       }
     } catch (error) {
       console.log(error);
@@ -47,13 +46,12 @@ function broadCastUpdatedConnectionsListTo(user_name: string) {
       arr.push(connection.meta);
     }
   }
-  send(
-    user_name,
+  emitData(
     JSON.stringify({
       event: SocketKeys.activePlayer,
       data: arr,
     })
-  );
+  ).to(user_name);
 }
 
 function observeConnecitonList(user_name: string) {
@@ -79,4 +77,3 @@ wsConnectionStateChangeInterceptors.push(async (ws, payload, isConnected) => {
   }
   broadCastUpdatedConnectionsList();
 });
-

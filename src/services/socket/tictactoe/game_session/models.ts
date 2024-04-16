@@ -1,7 +1,5 @@
 import { UserMeta } from "../../../../models/socket/UserMeta";
 
-import { GameSessionSessionHandler } from "./GameSession";
-
 export enum TileState {
   X = "X",
   O = "O",
