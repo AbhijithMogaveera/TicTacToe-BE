@@ -3,8 +3,7 @@ import {
   wsIncommingMessageInterceptors,
   wsOutGoingMessageInterceptors,
 } from "..";
-import { BufferLike } from "../wrapper/WebSocket";
-
+import { BufferLike } from "../../../util/WebSocket";
 
 if (true) {
   wsConnectionStateChangeInterceptors.push(async (ws, payload, isConnected) => {

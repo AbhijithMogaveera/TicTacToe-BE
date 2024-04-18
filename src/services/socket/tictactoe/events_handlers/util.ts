@@ -1,5 +1,5 @@
 import e from "express";
-import { emitData } from "../../wrapper/WebSocket";
+import { emitData } from "../../../../util/WebSocket";
 import { GameEvents } from "./event_names";
 import { activePlayRequest } from "./state";
 
@@ -24,12 +24,11 @@ export async function suspendInvitation(
   if (notifySuspension) {
     let { p1_user_name, p2_user_name } = activeRequest;
     await emitData(
-        JSON.stringify({
-          event: GameEvents.PLAY_REQ_REVOKE,
-          playReqId,
-        })
-      )
-    .to(p1_user_name, p2_user_name);
+      JSON.stringify({
+        event: GameEvents.PLAY_REQ_REVOKE,
+        playReqId,
+      })
+    ).to(p1_user_name, p2_user_name);
   }
   delete activePlayRequest[playReqId];
 }

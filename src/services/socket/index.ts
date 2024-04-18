@@ -11,7 +11,7 @@ export let wsOutGoingMessageInterceptors: OutGoingMessageInterceptor[] = [];
 export let wsConnectionStateChangeInterceptors: ConnectionStateInterceptor[] =
   [];
 
-import { emitData } from "./wrapper/WebSocket";
+import { emitData } from "../../util/WebSocket";
 import {
   ConnectionStateInterceptor,
   IncommingMessageInterceptor,
@@ -70,16 +70,14 @@ export async function startSocket(
       await wsConnectionStateChangeInterceptors[i](ws, payLoad, true);
     }
 
-    ws.on("message", async(message) => {
+    ws.on("message", async (message) => {
       try {
         for (let i = 0; i < wsIncommingMessageInterceptors.length; i++) {
           await wsIncommingMessageInterceptors[i](ws, payLoad, message);
         }
       } catch (e) {
         console.log(e);
-        emitData(
-          "Recived invalid josn format message"
-        ).to(ws, );
+        emitData("Recived invalid josn format message").to(ws);
       }
     });
 

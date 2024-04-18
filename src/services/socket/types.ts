@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import { AppJwtPayload } from "../../util/jwt";
-import { BufferLike } from "./wrapper/WebSocket";
+import { BufferLike } from "../../util/WebSocket";
 
 export type IncommingMessageInterceptor = (
   ws: WebSocket,
@@ -9,13 +9,13 @@ export type IncommingMessageInterceptor = (
 ) => Promise<void>;
 
 export type OutGoingMessageInterceptor = (
-    ws: WebSocket,
-    message: BufferLike,
-    user_name: string | undefined
+  ws: WebSocket,
+  message: BufferLike,
+  user_name: string | undefined
 ) => Promise<void>;
 
 export type ConnectionStateInterceptor = (
-    ws: WebSocket,
-    payload: AppJwtPayload,
-    isConnected: boolean
+  ws: WebSocket,
+  payload: AppJwtPayload,
+  isConnected: boolean
 ) => Promise<void>;

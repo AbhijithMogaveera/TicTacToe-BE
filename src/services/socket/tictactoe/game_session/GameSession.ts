@@ -2,7 +2,7 @@ import {
   wsConnectionStateChangeInterceptors,
   wsIncommingMessageInterceptors,
 } from "../..";
-import { emitData } from "../../wrapper/WebSocket";
+import { emitData } from "../../../../util/WebSocket";
 import { GameEvents } from "../events_handlers/event_names";
 import { ONE_SECOND, generateKey } from "../events_handlers/util";
 import { getConnectionByUserName } from "../../connection_handler/connection_handler";

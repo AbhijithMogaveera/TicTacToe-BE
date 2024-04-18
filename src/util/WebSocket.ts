@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
-import { wsOutGoingMessageInterceptors } from "..";
-import { connections } from "../connection_handler/connection_handler";
+import { wsOutGoingMessageInterceptors } from "../services/socket";
+import { connections } from "../services/socket/connection_handler/connection_handler";
 
 export type BufferLike =
   | string

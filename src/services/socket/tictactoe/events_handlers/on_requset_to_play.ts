@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { activePlayRequest } from "./state";
 import { UserMeta } from "../../../../models/socket/UserMeta";
 import { suspendInvitation } from "./util";
-import { emitData } from "../../wrapper/WebSocket";
+import { emitData } from "../../../../util/WebSocket";
 import { ConnectionStateInterceptor } from "../../types";
 wsIncommingMessageInterceptors.push(async (_ws, payload, message) => {
   try {

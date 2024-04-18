@@ -5,7 +5,7 @@ import {
   wsIncommingMessageInterceptors,
 } from "..";
 import { connections } from "./connection_handler";
-import { emitData } from "../wrapper/WebSocket";
+import { emitData } from "../../../util/WebSocket";
 
 let activeConnetcionsObserver: string[] = [];
 
@@ -25,7 +25,7 @@ function broadCastUpdatedConnectionsList() {
           JSON.stringify({
             event: SocketKeys.activePlayer,
             data: activeusersMeta,
-          }),
+          })
         ).to(user_name);
       }
     } catch (error) {
