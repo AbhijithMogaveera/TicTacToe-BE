@@ -10,7 +10,7 @@ if (true) {
     if (isConnected) {
       console.log("\n", `connect :: 🟢 ${payload.user_name}`);
     } else {
-      console.log("\n", `connect :: 🛑 ${payload.user_name}`);
+      console.log("\n", `disconnect :: 🛑 ${payload.user_name}`);
     }
   });
 
@@ -48,3 +48,4 @@ if (true) {
     }
   }
 }
+

@@ -57,6 +57,7 @@ export class GameSessionSessionHandler {
         startedAt: new Date().getMilliseconds(),
         gameState: GameState.NotStarted,
         gameWillEndIn: undefined,
+        prematureGameTerminationBy:undefined
       };
     } else throw "game already active";
     this.setUpMessageInterceptor(p1_user_uame, p2_user_name);
@@ -159,7 +160,7 @@ export class GameSessionSessionHandler {
             this.onTileTap(payload.user_name, data.data);
           }
           if (event == GameEvents.GAME_STOP) {
-            this.stopGame();
+            this.stopGame(payload.user_name);
           }
         }
       } catch (error) {
@@ -252,7 +253,7 @@ export class GameSessionSessionHandler {
       }
     }
   }
-  async stopGame() {
+  async stopGame(prematureGameTerminationBy: string | undefined = undefined) {
     if (activeGameSession[this.key]) {
       let connectionStateInterceptorIndex =
         wsConnectionStateChangeInterceptors.indexOf(
@@ -273,6 +274,7 @@ export class GameSessionSessionHandler {
       this.updateGameState({
         ...activeGameSession[this.key],
         gameState: GameState.End,
+        prematureGameTerminationBy:prematureGameTerminationBy
       });
       clearTimeout(this.p1TimeOut);
       clearTimeout(this.p2TimeOut);
