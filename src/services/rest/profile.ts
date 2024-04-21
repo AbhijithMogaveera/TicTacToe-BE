@@ -1,4 +1,4 @@
-import { UserDocument, UserRegistrationMongoModel } from "../schema/auth";
+import { UserDocument, UserRegistrationMongoModel } from "../../schema/auth";
 
 export async function findUserByUsername(
   username: string
@@ -10,8 +10,9 @@ export async function findUserByUsername(
     if (!user) {
       return null;
     }
-    
-    user.profile_picture =( process.env.SERVER_DNS_URL??"") + user.profile_picture;
+
+    user.profile_picture =
+      (process.env.SERVER_DNS_URL ?? "") + user.profile_picture;
     return user;
   } catch (error: any) {
     throw new Error(`Error finding user: ${error?.message}`);

@@ -1,11 +1,11 @@
 import { GameEvents } from "./event_names";
-import { connectionHandler } from "../../socket/ConnectionHandler";
-import { wsEventsInterceptors } from "../../socket/SocketServer";
+import { wsIncommingMessageInterceptors } from "../..";
 import { activeGame, activePlayRequest } from "./state";
 import TicTacToe from "../game_logic";
 import { generateKey, suspendInvitation } from "./util";
+import { startGame } from "../game_session/util";
 
-wsEventsInterceptors.push(async (_ws, _payload, message) => {
+wsIncommingMessageInterceptors.push(async (_ws, _payload, message) => {
   try {
     let messagePayload: SocketMessagePlayLoad = JSON.parse(message.toString());
 
@@ -15,9 +15,6 @@ wsEventsInterceptors.push(async (_ws, _payload, message) => {
     let invitationId: string = messagePayload.data;
     let req = activePlayRequest[invitationId];
     if (!req) {
-      console.log(
-        "active play reqest not found " + req + " of " + invitationId
-      );
       return;
     }
     let activeGameKey = generateKey(req.p1_user_name, req.p2_user_name);
@@ -34,21 +31,8 @@ wsEventsInterceptors.push(async (_ws, _payload, message) => {
         },
       ],
     };
-    let eventPayload = JSON.stringify({
-      event: GameEvents.GAME,
-      data: activeGame[activeGameKey],
-      isAccepted: true,
-      invitation_id: invitationId,
-    });
-    connectionHandler
-      .getConnectionByUserName(req.p1_user_name)
-      ?.ws.send(eventPayload) ??
-      console.log("connection not found for " + req.p1_user_name);
-    connectionHandler
-      .getConnectionByUserName(req.p2_user_name)
-      ?.ws.send(eventPayload) ??
-      console.log("connection not found for " + req.p1_user_name);
-    suspendInvitation(invitationId, false);
+    await suspendInvitation(invitationId, true);
+    await startGame(req.p1_user_name, req.p2_user_name);
   } catch (e) {
     console.log(e);
   }

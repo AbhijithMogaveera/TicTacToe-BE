@@ -1,6 +1,11 @@
-import { connectionHandler } from "../../socket/ConnectionHandler";
+import e from "express";
+import { emitData } from "../../../../util/WebSocket";
 import { GameEvents } from "./event_names";
 import { activePlayRequest } from "./state";
+
+export const ONE_SECOND = 1000;
+export const ONE_MINUTE = 60 * ONE_SECOND;
+export const TEN_MINUTE = ONE_MINUTE * 10;
 
 export function generateKey(username1: string, username2: string): string {
   const sortedUsernames = [username1, username2].sort();
@@ -8,29 +13,22 @@ export function generateKey(username1: string, username2: string): string {
   return key;
 }
 
-export function suspendInvitation(
+export async function suspendInvitation(
   playReqId: string,
   notifySuspension: boolean
 ) {
   const activeRequest = activePlayRequest[playReqId];
   if (!activeRequest) {
-    console.log("active play request not found for " + playReqId);
     return;
   }
   if (notifySuspension) {
     let { p1_user_name, p2_user_name } = activeRequest;
-    [
-      connectionHandler.getConnectionByUserName(p1_user_name),
-      connectionHandler.getConnectionByUserName(p2_user_name),
-    ].forEach((it) => {
-      it?.ws.send(
-        JSON.stringify({
-          event: GameEvents.PLAY_REQ_REVOKE,
-          playReqId,
-        })
-      );
-    });
+    await emitData(
+      JSON.stringify({
+        event: GameEvents.PLAY_REQ_REVOKE,
+        playReqId,
+      })
+    ).to(p1_user_name, p2_user_name);
   }
   delete activePlayRequest[playReqId];
-  console.log("delete active play request", activeRequest);
 }

@@ -4,7 +4,7 @@ import { indexRouter } from "./src/routes/index_router";
 import { connectToDatabase } from "./src/config/mongo";
 import cors from "cors";
 import path from "path";
-import { startSocket } from "./src/services/socket/SocketServer";
+import { startSocket } from "./src/services/socket";
 
 dotenv.config();
 
