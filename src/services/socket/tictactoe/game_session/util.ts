@@ -31,8 +31,8 @@ export function checkForWinner(
           winTileEnd: i * 3 + 2,
           winPlayerUsername:
             data.current_turn === data.player_1.user_name
-              ? data.player_2.user_name
-              : data.player_1.user_name,
+              ? data.player_1.user_name
+              : data.player_2.user_name,
         },
       };
     }
@@ -74,8 +74,8 @@ export function checkForWinner(
         winTileEnd: 8,
         winPlayerUsername:
           data.current_turn === data.player_1.user_name
-            ? data.player_2.user_name
-            : data.player_1.user_name,
+            ? data.player_1.user_name
+            : data.player_2.user_name,
       },
     };
   }

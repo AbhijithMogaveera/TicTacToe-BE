@@ -48,7 +48,7 @@ export interface ActiveGameSession {
   startedAt: number;
   gameState: GameState;
   gameWillEndIn: number | undefined;
-  prematureGameTerminationBy: string | undefined;
+  prematureGameTerminationBy:string | undefined
 }
 
 export interface PlayerMeta extends UserMeta {

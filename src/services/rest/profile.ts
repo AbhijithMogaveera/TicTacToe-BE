@@ -1,5 +1,4 @@
 import { UserDocument, UserRegistrationMongoModel } from "../../schema/auth";
-import { connections } from "../socket/connection_handler/connection_handler";
 
 export async function findUserByUsername(
   username: string

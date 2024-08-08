@@ -221,7 +221,6 @@ export class GameSessionSessionHandler {
             board: gameState.board.board.map((value, index) => {
               if (postion == index) {
                 let tile = this.getPlayerDetails(player)?.tile;
-                console.log(`TILE------->${player} ${tile}`)
                 if (!tile) {
                   throw "player not found";
                 }
@@ -275,7 +274,7 @@ export class GameSessionSessionHandler {
       this.updateGameState({
         ...activeGameSession[this.key],
         gameState: GameState.End,
-        prematureGameTerminationBy: prematureGameTerminationBy,
+        prematureGameTerminationBy:prematureGameTerminationBy
       });
       clearTimeout(this.p1TimeOut);
       clearTimeout(this.p2TimeOut);
