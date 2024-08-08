@@ -1,6 +1,5 @@
 import express from "express";
 import { AuthRouter } from "./auth";
-import { validateToken } from "../middleware/jwt";
 import { ProfileRouter } from "./profile";
 
 export const indexRouter = express.Router();

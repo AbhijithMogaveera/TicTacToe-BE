@@ -39,6 +39,7 @@ export async function updateProfileDeatils({
 }
 
 export async function deleteProfileImage(user_name: string) {
+  //todo: delete from storage also
   await UserRegistrationMongoModel.findOneAndUpdate(
     { user_name },
     { profile_picture: undefined }

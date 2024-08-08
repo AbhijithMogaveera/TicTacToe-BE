@@ -27,9 +27,9 @@ export enum GameState {
 
 export interface BoardState {
   board: TileState[];
-  winTileDiagonalStart: number | undefined;
-  winTileDiagonalMiddle: number | undefined;
-  winTileDiagonalEnd: number | undefined;
+  winTileStart: number | undefined;
+  winTileMiddle: number | undefined;
+  winTileEnd: number | undefined;
   winPlayerUsername: string | undefined;
   activePlayerUserName: string | undefined;
   activePlayerTile: string | undefined;
@@ -58,4 +58,3 @@ export interface PlayerMeta extends UserMeta {
 export let activeGameSession: {
   [key: string]: ActiveGameSession;
 } = {};
-

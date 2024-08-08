@@ -26,13 +26,13 @@ export function checkForWinner(
         ...data,
         board: {
           ...data.board,
-          winTileDiagonalStart: i * 3,
-          winTileDiagonalMiddle: i * 3 + 1,
-          winTileDiagonalEnd: i * 3 + 2,
+          winTileStart: i * 3,
+          winTileMiddle: i * 3 + 1,
+          winTileEnd: i * 3 + 2,
           winPlayerUsername:
             data.current_turn === data.player_1.user_name
-              ? data.player_2.user_name
-              : data.player_1.user_name,
+              ? data.player_1.user_name
+              : data.player_2.user_name,
         },
       };
     }
@@ -47,13 +47,13 @@ export function checkForWinner(
         ...data,
         board: {
           ...data.board,
-          winTileDiagonalStart: i,
-          winTileDiagonalMiddle: i + 3,
-          winTileDiagonalEnd: i + 6,
+          winTileStart: i,
+          winTileMiddle: i + 3,
+          winTileEnd: i + 6,
           winPlayerUsername:
             data.current_turn === data.player_1.user_name
-              ? data.player_2.user_name
-              : data.player_1.user_name,
+              ? data.player_1.user_name
+              : data.player_2.user_name,
         },
       };
     }
@@ -69,13 +69,13 @@ export function checkForWinner(
       ...data,
       board: {
         ...data.board,
-        winTileDiagonalStart: 0,
-        winTileDiagonalMiddle: 4,
-        winTileDiagonalEnd: 8,
+        winTileStart: 0,
+        winTileMiddle: 4,
+        winTileEnd: 8,
         winPlayerUsername:
           data.current_turn === data.player_1.user_name
-            ? data.player_2.user_name
-            : data.player_1.user_name,
+            ? data.player_1.user_name
+            : data.player_2.user_name,
       },
     };
   }
@@ -89,13 +89,13 @@ export function checkForWinner(
       ...data,
       board: {
         ...data.board,
-        winTileDiagonalStart: 2,
-        winTileDiagonalMiddle: 4,
-        winTileDiagonalEnd: 6,
+        winTileStart: 2,
+        winTileMiddle: 4,
+        winTileEnd: 6,
         winPlayerUsername:
           data.current_turn === data.player_1.user_name
-            ? data.player_2.user_name
-            : data.player_1.user_name,
+            ? data.player_1.user_name
+            : data.player_2.user_name,
       },
     };
   }
@@ -106,9 +106,9 @@ export function checkForWinner(
       ...data,
       board: {
         ...data.board,
-        winTileDiagonalStart: undefined,
-        winTileDiagonalMiddle: undefined,
-        winTileDiagonalEnd: undefined,
+        winTileStart: undefined,
+        winTileMiddle: undefined,
+        winTileEnd: undefined,
         winPlayerUsername: undefined,
       },
     };
