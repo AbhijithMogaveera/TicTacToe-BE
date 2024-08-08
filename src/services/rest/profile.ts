@@ -1,4 +1,5 @@
 import { UserDocument, UserRegistrationMongoModel } from "../../schema/auth";
+import { connections } from "../socket/connection_handler/connection_handler";
 
 export async function findUserByUsername(
   username: string
@@ -39,6 +40,7 @@ export async function updateProfileDeatils({
 }
 
 export async function deleteProfileImage(user_name: string) {
+  //todo: delete from storage also
   await UserRegistrationMongoModel.findOneAndUpdate(
     { user_name },
     { profile_picture: undefined }

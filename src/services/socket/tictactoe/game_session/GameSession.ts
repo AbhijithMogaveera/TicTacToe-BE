@@ -43,9 +43,9 @@ export class GameSessionSessionHandler {
       activeGameSession[this.key] = {
         board: {
           board: defalutTileState,
-          winTileDiagonalStart: undefined,
-          winTileDiagonalMiddle: undefined,
-          winTileDiagonalEnd: undefined,
+          winTileStart: undefined,
+          winTileMiddle: undefined,
+          winTileEnd: undefined,
           winPlayerUsername: undefined,
           activePlayerTile: undefined,
           invitation_id: v4().toString(),
@@ -57,7 +57,7 @@ export class GameSessionSessionHandler {
         startedAt: new Date().getMilliseconds(),
         gameState: GameState.NotStarted,
         gameWillEndIn: undefined,
-        prematureGameTerminationBy:undefined
+        prematureGameTerminationBy: undefined,
       };
     } else throw "game already active";
     this.setUpMessageInterceptor(p1_user_uame, p2_user_name);
@@ -221,6 +221,7 @@ export class GameSessionSessionHandler {
             board: gameState.board.board.map((value, index) => {
               if (postion == index) {
                 let tile = this.getPlayerDetails(player)?.tile;
+                console.log(`TILE------->${player} ${tile}`)
                 if (!tile) {
                   throw "player not found";
                 }
@@ -274,7 +275,7 @@ export class GameSessionSessionHandler {
       this.updateGameState({
         ...activeGameSession[this.key],
         gameState: GameState.End,
-        prematureGameTerminationBy:prematureGameTerminationBy
+        prematureGameTerminationBy: prematureGameTerminationBy,
       });
       clearTimeout(this.p1TimeOut);
       clearTimeout(this.p2TimeOut);
